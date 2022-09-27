@@ -43,13 +43,14 @@ func Calendar(w http.ResponseWriter, r *http.Request) {
 	cal.SetName("Расписание занятий ВШЭ")
 	cal.SetXPublishedTTL("PT7D")
 	cal.SetRefreshInterval("PT7D")
+	loc, _ := time.LoadLocation("Europe/Moscow") //TODO: make it depend on building
 	for _, l := range lessons {
 		event := cal.AddEvent(strconv.Itoa(l.LessonOid))
-		start, err := time.Parse("2006.01.02-15:04", l.Date+"-"+l.BeginLesson)
+		start, err := time.ParseInLocation("2006.01.02-15:04", l.Date+"-"+l.BeginLesson, loc)
 		if err != nil {
 			log.Println(err)
 		}
-		end, err := time.Parse("2006.01.02-15:04", l.Date+"-"+l.EndLesson)
+		end, err := time.ParseInLocation("2006.01.02-15:04", l.Date+"-"+l.EndLesson, loc)
 		if err != nil {
 			log.Println(err)
 		}
