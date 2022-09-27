@@ -1,12 +1,13 @@
 FROM golang:1.19-alpine
 RUN apk add --no-cache git make build-base
 WORKDIR /go/app
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
 COPY . ./
-RUN go get .
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+RUN CGO_ENABLED=0 go build -a -o app .
 
 FROM alpine:latest
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /root/
 COPY --from=0 /go/app ./
 CMD ["./app"]
