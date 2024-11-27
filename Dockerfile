@@ -1,4 +1,4 @@
-FROM golang:1.19-alpine
+FROM golang:1.23-alpine
 RUN apk add --no-cache git make build-base
 WORKDIR /go/app
 COPY go.mod go.sum ./

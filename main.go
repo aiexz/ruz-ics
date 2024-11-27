@@ -5,19 +5,21 @@ import (
 	"encoding/json"
 	"fmt"
 	ics "github.com/arran4/golang-ical"
-	"github.com/getsentry/sentry-go"
-	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
-	"os"
 	"ruz-ics/gruz"
 	"strconv"
 	"strings"
 	"time"
 )
 
-var client = gruz.NewClient(http.DefaultClient)
+// add http proxy
+var client = gruz.NewClient(&http.Client{
+	Transport: &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+	},
+})
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -62,6 +64,7 @@ func Calendar(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/calendar")
 	w.Header().Set("Content-Disposition", "attachment; filename=ruz.ics")
 	fmt.Fprint(w, cal.Serialize())
+	log.Println(fmt.Sprintf("GET /cal/%s", id))
 }
 
 func Info(w http.ResponseWriter, r *http.Request) {
@@ -79,25 +82,16 @@ func Info(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 	fmt.Fprint(w, string(userJson))
+	log.Println(fmt.Sprintf("GET /info %s", email))
 }
 
 func main() {
-	SentryDsn := os.Getenv("SENTRY_DSN")
-	if SentryDsn != "" {
-		err := sentry.Init(sentry.ClientOptions{
-			Dsn:              SentryDsn,
-			TracesSampleRate: 1.0,
-		})
-		if err != nil {
-			log.Fatalf("sentry.Init: %s", err)
-		}
-	}
-	sentryHandler := sentryhttp.New(sentryhttp.Options{})
 	router := httprouter.New()
 	router.ServeFiles("/css/*filepath", http.Dir("templates/css"))
-	router.HandlerFunc("GET", "/", sentryHandler.HandleFunc(Index))
-	router.HandlerFunc("GET", "/cal/:id", sentryHandler.HandleFunc(Calendar))
-	router.HandlerFunc("GET", "/info", sentryHandler.HandleFunc(Info))
+	router.HandlerFunc("GET", "/", Index)
+	router.HandlerFunc("GET", "/cal/:id", Calendar)
+	router.HandlerFunc("GET", "/info", Info)
+	log.Println("Listening on :8001")
 	log.Fatal(http.ListenAndServe(":8001", router))
 
 }

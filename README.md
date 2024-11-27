@@ -1,15 +1,8 @@
-# Использование оффициального варианта
-<img width="1552" alt="image" src="https://user-images.githubusercontent.com/42418433/204557913-21bfd9ba-1813-4d9b-a97c-caa0fd2aafce.png">
-Расписание на неделю в файле
+# Если бы мы знали, что это такое, но мы не знаем, что это такое
+https://elib.hse.ru/e-resources/ez/ezregulation.htm
 
-## Как получить ссылку .ics? 
-### Вариант 1
-1. Переходим на `https://ruz.hse.ru/api/studentinfo?email=`студ. почта
-2. Копируем цифровое значение id
-3. Вставляем id вместо XXX в `https://ruz.hse.ru/api/schedule/student/XXX.ics`
-4. Готово! Открываем эту ссылку в google/apple календаре и будет расписание на неделю
-### Вариант 2
-Посмотреть XHR запрос в браузере и достать ссылку
+```bash
+docker build -t hse .
+docker run -d -p 8001:8080 -e HTTP_PROXY=http://<student_mail>:<password from library>@89.175.46.139:3128 hse
+```
 
-## Personal project
-Разработка остановлена
